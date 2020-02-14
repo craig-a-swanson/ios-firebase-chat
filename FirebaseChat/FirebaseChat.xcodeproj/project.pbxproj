@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,8 @@
 		44FD58EA23F66D590065D67F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 44FD58E823F66D590065D67F /* Main.storyboard */; };
 		44FD58EC23F66D5A0065D67F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44FD58EB23F66D5A0065D67F /* Assets.xcassets */; };
 		44FD58EF23F66D5A0065D67F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 44FD58ED23F66D5A0065D67F /* LaunchScreen.storyboard */; };
+		44FD58FA23F678570065D67F /* MessageKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44FD58F823F678570065D67F /* MessageKit.framework */; };
+		44FD58FB23F678580065D67F /* InputBarAccessoryView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44FD58F923F678570065D67F /* InputBarAccessoryView.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +26,8 @@
 		44FD58EB23F66D5A0065D67F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		44FD58EE23F66D5A0065D67F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		44FD58F023F66D5A0065D67F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		44FD58F823F678570065D67F /* MessageKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageKit.framework; path = Carthage/Build/iOS/MessageKit.framework; sourceTree = SOURCE_ROOT; };
+		44FD58F923F678570065D67F /* InputBarAccessoryView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = InputBarAccessoryView.framework; path = Carthage/Build/iOS/InputBarAccessoryView.framework; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +35,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44FD58FA23F678570065D67F /* MessageKit.framework in Frameworks */,
+				44FD58FB23F678580065D67F /* InputBarAccessoryView.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -56,6 +62,7 @@
 		44FD58E123F66D590065D67F /* FirebaseChat */ = {
 			isa = PBXGroup;
 			children = (
+				44FD58F723F678330065D67F /* Dependencies */,
 				44FD58E223F66D590065D67F /* AppDelegate.swift */,
 				44FD58E423F66D590065D67F /* SceneDelegate.swift */,
 				44FD58E623F66D590065D67F /* ViewController.swift */,
@@ -65,6 +72,15 @@
 				44FD58F023F66D5A0065D67F /* Info.plist */,
 			);
 			path = FirebaseChat;
+			sourceTree = "<group>";
+		};
+		44FD58F723F678330065D67F /* Dependencies */ = {
+			isa = PBXGroup;
+			children = (
+				44FD58F923F678570065D67F /* InputBarAccessoryView.framework */,
+				44FD58F823F678570065D67F /* MessageKit.framework */,
+			);
+			path = Dependencies;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -77,6 +93,7 @@
 				44FD58DB23F66D590065D67F /* Sources */,
 				44FD58DC23F66D590065D67F /* Frameworks */,
 				44FD58DD23F66D590065D67F /* Resources */,
+				44FD58F623F677560065D67F /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -132,6 +149,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		44FD58F623F677560065D67F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"$(SRCROOT)/input.xcfilelist",
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+				"$(SRCROOT)/output.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n/usr/local/bin/carthage copy-frameworks\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		44FD58DB23F66D590065D67F /* Sources */ = {
@@ -286,6 +325,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2MZREBG7BM;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = FirebaseChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -304,6 +347,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2MZREBG7BM;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = FirebaseChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

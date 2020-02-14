@@ -1,0 +1,2 @@
+$(SRCROOT)/Carthage/Build/iOS/MessageKit.framework
+$(SRCROOT)/Carthage/Build/iOS/InputBarAccessoryView.framework
