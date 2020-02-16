@@ -10,15 +10,41 @@ import UIKit
 import Firebase
 
 class ChatRoomTableViewController: UITableViewController {
+    
+    // MARK: - Properties
+    
+    let chatMessageController = ChatMessageController()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        
+        // Get current user from User Defaults, or create a user for the first time
+        if let currentUserDictionary = UserDefaults.standard.value(forKey: "currentUser") as? [String:String] {
+            let currentUser = Sender(dictionary: currentUserDictionary)
+            chatMessageController.currentUser = currentUser
+        } else {
+            // Create an alert that asks the user for a username and saves it to User Defaults
+            let alert = UIAlertController(title: "Set a username", message: nil, preferredStyle: .alert)
+            var usernameTextField: UITextField!
+            
+            alert.addTextField { (textfield) in
+                textfield.placeholder = "Username:"
+                usernameTextField = textfield
+            }
+            
+            let submitAction = UIAlertAction(title: "Submit", style: .default) { (_) in
+                // Take the text field's text and save to User Defaults
+                let displayName = usernameTextField.text ?? "No Name"
+                let id = UUID().uuidString
+                let sender = Sender(senderId: id, displayName: displayName)
+                
+                UserDefaults.standard.set(sender.dictionaryRepresentation, forKey: "currentUser")
+                self.chatMessageController.currentUser = sender
+            }
+            
+            alert.addAction(submitAction)
+            present(alert, animated: true, completion: nil)
+        }
     }
 
     // MARK: - Table view data source
@@ -30,62 +56,26 @@ class ChatRoomTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
+        return chatMessageController.messages.count
     }
 
-    /*
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
-
-        // Configure the cell...
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatRoomCell", for: indexPath)
+        
+        cell.textLabel?.text = chatMessageController.messages[indexPath.row].roomName
 
         return cell
     }
-    */
 
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        if segue.identifier == "MessageDetailSegue" {
+            guard let indexPath = tableView.indexPathForSelectedRow,
+                let messageDetailVC = segue.destination as? MessageDetailViewController else { return }
+            
+            
+        }
     }
-    */
-
 }

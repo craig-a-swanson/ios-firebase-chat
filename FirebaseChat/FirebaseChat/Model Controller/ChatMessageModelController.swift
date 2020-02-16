@@ -21,17 +21,19 @@ import Firebase
 class ChatMessageController {
     
     var databaseReference: DatabaseReference!
-    var messages: [DataSnapshot]! = []
+    var messages: [ChatRoom] = []
+    var dataSnapshots: [DataSnapshot]! = []
     fileprivate var _refHandle: DatabaseHandle!
+    var currentUser: Sender?
     
-    func configureDatabase() {
-        databaseReference = Database.database().reference()
-        // this next one listens for a new "child added" (messages addition)
-        _refHandle = self.databaseReference.child("messages").observe(.childAdded, with: { [weak self] (snapshot) -> Void in
-            guard let strongSelf = self else { return }
-            strongSelf.messages.append(snapshot)
-            strongSelf.clientTable.insertRows(at: [IndexPath(row: strongSelf.messages.count-1, section: 0)], with: .automatic)
-        })
-    }
+//    func configureDatabase() {
+//        databaseReference = Database.database().reference()
+//        // this next one listens for a new "child added" (messages addition)
+//        _refHandle = self.databaseReference.child("messages").observe(.childAdded, with: { [weak self] (snapshot) -> Void in
+//            guard let strongSelf = self else { return }
+//            strongSelf.messages.append(snapshot)
+//            strongSelf.clientTable.insertRows(at: [IndexPath(row: strongSelf.messages.count-1, section: 0)], with: .automatic)
+//        })
+//    }
     
 }
