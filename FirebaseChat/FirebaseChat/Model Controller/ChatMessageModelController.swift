@@ -20,8 +20,9 @@ import Firebase
 
 class ChatMessageController {
     
+    static let baseURL = URL(string: "https://fir-chat-3a173.firebaseio.com/")!
     var databaseReference: DatabaseReference!
-    var messages: [ChatRoom] = []
+    var chatRooms: [ChatRoom] = []
     var dataSnapshots: [DataSnapshot]! = []
     fileprivate var _refHandle: DatabaseHandle!
     var currentUser: Sender?
@@ -36,4 +37,88 @@ class ChatMessageController {
 //        })
 //    }
     
+    func fetchChatRooms(completion: @escaping () -> Void) {
+        
+        let requestURL = ChatMessageController.baseURL.appendingPathExtension("json")
+        
+        URLSession.shared.dataTask(with: requestURL) { (possibleData, _, possibleError) in
+            if let error = possibleError {
+                NSLog("Error fetching chat rooms: \(error)")
+                completion()
+                return
+            }
+            
+            guard let data = possibleData else {
+                NSLog("No data returned from fetch Chat Rooms data task")
+                completion()
+                return
+            }
+            
+            do {
+                self.chatRooms = try JSONDecoder().decode([String: ChatRoom].self, from: data).map({ $0.value })
+            } catch {
+                self.chatRooms = []
+                NSLog("Error decoding chat rooms from JSON data: \(error)")
+            }
+            completion()
+        }.resume()
+    }
+    
+    func createChatRoom(with roomName: String, completion: @escaping () -> Void) {
+        
+        let room = ChatRoom(roomName: roomName)
+        
+        let requestURL = ChatMessageController.baseURL.appendingPathComponent(room.roomID).appendingPathExtension("json")
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "PUT"
+        
+        do {
+            request.httpBody = try JSONEncoder().encode(room)
+        } catch {
+            NSLog("Error encoding chat room name to JSON: \(error)")
+        }
+        
+        URLSession.shared.dataTask(with: request) { (possibleData, _, possibleError) in
+            if let error = possibleError {
+                NSLog("Error with chat room creation data task: \(error)")
+                completion()
+                return
+            }
+            self.chatRooms.append(room)
+            completion()
+            
+        }.resume()
+    }
+    
+    func createMessage(in chatRoom: ChatRoom, withText text: String, sender: Sender, completion: @escaping () -> Void) {
+        
+        guard let index = chatRooms.firstIndex(of: chatRoom) else { completion(); return }
+        
+        let message = ChatRoom.Message(messageText: text, sender: sender)
+        
+        chatRooms[index].messages.append(message)
+        
+        let requestURL = ChatMessageController.self.baseURL.appendingPathComponent(chatRoom.roomID).appendingPathComponent("messages").appendingPathExtension("json")
+        
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "POST"
+        
+        do {
+            request.httpBody = try JSONEncoder().encode(message)
+        } catch {
+            NSLog("Error encoding message to JSON: \(error)")
+        }
+        
+        URLSession.shared.dataTask(with: request) { (data, _, error) in
+            
+            if let error = error {
+                NSLog("Error with message thread creation data task: \(error)")
+                completion()
+                return
+            }
+            
+            completion()
+            
+        }.resume()
+    }
 }

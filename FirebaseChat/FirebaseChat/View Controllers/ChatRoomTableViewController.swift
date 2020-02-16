@@ -15,6 +15,9 @@ class ChatRoomTableViewController: UITableViewController {
     
     let chatMessageController = ChatMessageController()
 
+    @IBOutlet weak var chatRoomTextField: UITextField!
+    
+    // MARK: - View controller life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -46,7 +49,30 @@ class ChatRoomTableViewController: UITableViewController {
             present(alert, animated: true, completion: nil)
         }
     }
-
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        chatMessageController.fetchChatRooms {
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
+    @IBAction func createChatRoom(_ sender: UITextField) {
+        chatRoomTextField.resignFirstResponder()
+        
+        guard let roomName = chatRoomTextField.text else { return }
+        chatRoomTextField.text = ""
+        
+        chatMessageController.createChatRoom(with: roomName) {
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -56,13 +82,13 @@ class ChatRoomTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return chatMessageController.messages.count
+        return chatMessageController.chatRooms.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ChatRoomCell", for: indexPath)
         
-        cell.textLabel?.text = chatMessageController.messages[indexPath.row].roomName
+        cell.textLabel?.text = chatMessageController.chatRooms[indexPath.row].roomName
 
         return cell
     }

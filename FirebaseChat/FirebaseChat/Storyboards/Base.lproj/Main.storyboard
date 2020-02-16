@@ -15,9 +15,30 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <view key="tableHeaderView" contentMode="scaleToFill" id="Nlu-gD-4xu">
+                            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <subviews>
+                                <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Create a new chat room" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="AtY-80-RIn">
+                                    <rect key="frame" x="8" y="7" width="398" height="30"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                    <textInputTraits key="textInputTraits"/>
+                                    <connections>
+                                        <action selector="createChatRoom:" destination="Lk2-3K-bli" eventType="editingDidEndOnExit" id="gPu-vg-K7Q"/>
+                                    </connections>
+                                </textField>
+                            </subviews>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                            <constraints>
+                                <constraint firstItem="AtY-80-RIn" firstAttribute="top" secondItem="Nlu-gD-4xu" secondAttribute="top" constant="7" id="5XQ-s9-szS"/>
+                                <constraint firstItem="AtY-80-RIn" firstAttribute="leading" secondItem="Nlu-gD-4xu" secondAttribute="leading" constant="8" id="ce2-GU-qSp"/>
+                                <constraint firstAttribute="trailing" secondItem="AtY-80-RIn" secondAttribute="trailing" constant="8" id="jH7-ka-uLr"/>
+                                <constraint firstAttribute="bottom" secondItem="AtY-80-RIn" secondAttribute="bottom" constant="7" id="x4n-La-Bvk"/>
+                            </constraints>
+                        </view>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ChatRoomCell" textLabel="8YC-pm-NYE" style="IBUITableViewCellStyleDefault" id="dfG-pP-Wnv">
-                                <rect key="frame" x="0.0" y="28" width="414" height="43.5"/>
+                                <rect key="frame" x="0.0" y="72" width="414" height="43.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="dfG-pP-Wnv" id="fGA-wx-pOE">
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
@@ -43,6 +64,9 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Chat Rooms" id="Uth-4X-bWv"/>
+                    <connections>
+                        <outlet property="chatRoomTextField" destination="AtY-80-RIn" id="ypL-yG-t57"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Zq1-gt-lMi" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
