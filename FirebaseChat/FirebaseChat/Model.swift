@@ -10,6 +10,8 @@ import Foundation
 import MessageKit
 import Firebase
 
+// TODO: encoder needs to convert roomID and roomName to the correct json
+
 class ChatRoom: Codable, Equatable {
     
     let roomName: String
