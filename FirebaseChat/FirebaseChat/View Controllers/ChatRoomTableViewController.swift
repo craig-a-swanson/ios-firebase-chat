@@ -7,13 +7,15 @@
 //
 
 import UIKit
-import Firebase
+import FirebaseDatabase
 
 class ChatRoomTableViewController: UITableViewController {
     
     // MARK: - Properties
     
     let chatMessageController = ChatMessageController()
+//    var databaseReference: DatabaseReference!
+    fileprivate var _refHandle: DatabaseHandle!
 
     @IBOutlet weak var chatRoomTextField: UITextField!
     
@@ -47,6 +49,12 @@ class ChatRoomTableViewController: UITableViewController {
             
             alert.addAction(submitAction)
             present(alert, animated: true, completion: nil)
+        }
+        
+        chatMessageController.fetchChatRooms() {
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
     }
     
