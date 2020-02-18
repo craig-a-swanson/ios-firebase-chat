@@ -24,26 +24,45 @@ class ChatRoom: Codable, Equatable {
         self.messages = messages
     }
     
-    enum RoomCodingKeys: String, CodingKey {
-        case title
-        case identifier
-        case messages
+    // convert a message to a dictionary
+    var dictionaryRepresentation: [String: Any] {
+        return ["roomName" : roomName as String,
+                "roomID" : roomID as String,
+                "messages" : messages as [Message]]
     }
     
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: RoomCodingKeys.self)
-        
-        let roomName = try container.decode(String.self, forKey: .title)
-        let roomID = try container.decode(String.self, forKey: .identifier)
-        
-        if let messages = try container.decodeIfPresent([String:Message].self, forKey: .messages) {
-            self.messages = Array(messages.values)
-        } else {
-            self.messages = []
+    // convert a dictionary back to a message object to be used by the rest of the app
+    convenience init? (dictionary: [String: String]) {
+        guard let roomName = dictionary["roomName"],
+            let roomID = dictionary["roomID"],
+            let messages = dictionary["messages"] else { return nil }
+        let messageArray: [ChatRoom.Message] = Array(messages)
+        for message in messages {
+            let newMessage = Message(dictionary: [:])
         }
-        self.roomName = roomName
-        self.roomID = roomID
+        self.init(roomName: roomName, roomID: roomID, messages: messageArray)
     }
+    
+//    enum RoomCodingKeys: String, CodingKey {
+//        case title
+//        case identifier
+//        case messages
+//    }
+//    
+//    required init(from decoder: Decoder) throws {
+//        let container = try decoder.container(keyedBy: RoomCodingKeys.self)
+//        
+//        let roomName = try container.decode(String.self, forKey: .title)
+//        let roomID = try container.decode(String.self, forKey: .identifier)
+//        
+//        if let messages = try container.decodeIfPresent([String:Message].self, forKey: .messages) {
+//            self.messages = Array(messages.values)
+//        } else {
+//            self.messages = []
+//        }
+//        self.roomName = roomName
+//        self.roomID = roomID
+//    }
     
     struct Message: Codable, Equatable, MessageType {
         var sender: SenderType {
@@ -70,33 +89,58 @@ class ChatRoom: Codable, Equatable {
             self.messageId = messageId
         }
         
-        enum CodingKeys: String, CodingKey {
-            case displayName
-            case senderId
-            case text
-            case timestamp
+        // convert a message to a dictionary
+        var dictionaryRepresentation: [String: Any] {
+            return ["messageID" : messageId as String,
+                    "text" : messageText as String,
+                    "timestamp" : timestamp as Date,
+                    "senderId" : senderId as String,
+                    "displayName": displayName as String]
         }
         
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            
-            let messageText = try container.decode(String.self, forKey: .text)
-            let displayName = try container.decode(String.self, forKey: .displayName)
-            let senderId = try container.decode(String.self, forKey: .senderId)
-            let timestamp = try container.decode(Date.self, forKey: .timestamp)
-            
+        // convert a dictionary back to a message object to be used by the rest of the app
+        init? (dictionary: [String:String]) {
+            guard let messageID = dictionary["messageID"],
+                let messageText = dictionary["text"],
+                let timestamp: Date = {
+                    let stringDate = dictionary["timestamp"]
+                    let dateFormatter = ISO8601DateFormatter()
+                    let date = dateFormatter.date(from: stringDate!)
+                    return date
+                }(),
+                let senderId = dictionary["senderId"],
+                let displayName = dictionary["displayName"] else { return nil }
             let sender = Sender(senderId: senderId, displayName: displayName)
-            self.init(messageText: messageText, sender: sender, timestamp: timestamp)
+            self.init(messageText: messageText, sender: sender, timestamp: timestamp, messageId: messageID)
         }
-        
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            
-            try container.encode(displayName, forKey: .displayName)
-            try container.encode(senderId, forKey: .senderId)
-            try container.encode(timestamp, forKey: .timestamp)
-            try container.encode(messageText, forKey: .text)
-        }
+//
+//        enum CodingKeys: String, CodingKey {
+//            case displayName
+//            case senderId
+//            case text
+//            case timestamp
+//        }
+//
+//        init(from decoder: Decoder) throws {
+//            let container = try decoder.container(keyedBy: CodingKeys.self)
+//
+//            let messageText = try container.decode(String.self, forKey: .text)
+//            let displayName = try container.decode(String.self, forKey: .displayName)
+//            let senderId = try container.decode(String.self, forKey: .senderId)
+//            let timestamp = try container.decode(Date.self, forKey: .timestamp)
+//
+//            let sender = Sender(senderId: senderId, displayName: displayName)
+//            self.init(messageText: messageText, sender: sender, timestamp: timestamp)
+//        }
+//
+//        func encode(to encoder: Encoder) throws {
+//            var container = encoder.container(keyedBy: CodingKeys.self)
+//
+//            try container.encode(displayName, forKey: .displayName)
+//            try container.encode(senderId, forKey: .senderId)
+//            try container.encode(timestamp, forKey: .timestamp)
+//            try container.encode(messageText, forKey: .text)
+//        }
     }
     
     static func == (lhs: ChatRoom, rhs: ChatRoom) -> Bool {
