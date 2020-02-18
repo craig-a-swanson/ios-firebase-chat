@@ -68,30 +68,34 @@ class ChatRoom: Codable, Equatable {
         
         // convert a dictionary back to a message object to be used by the rest of the app
         init? (snapshot: DataSnapshot) {
+            var dateFormatter: DateFormatter {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "MM-dd-yyy'T'HH:mm:SS"
+                return formatter
+            }
             guard let value = snapshot.value as? [String:Any],
                 let messageID = value["messageID"] as? String,
                 let messageText = value["text"] as? String,
-//                let timestamp = formatter.date(from: value["timestamp"] as String),
-                let timestamp: Date = {
-                    let stringDate = value["timestamp"] as? String
-                    let dateFormatter = DateFormatter()
-                    let date = dateFormatter.date(from: stringDate!)
-                    return date
-                }(),
+                let timestamp = value["timestamp"] as? String,
+                let date = dateFormatter.date(from: timestamp),
                 let senderId = value["senderId"] as? String,
                 let displayName = value["displayName"] as? String else { return nil }
             let sender = Sender(senderId: senderId, displayName: displayName)
-            self.init(messageText: messageText, sender: sender, timestamp: timestamp, messageId: messageID)
+            self.init(messageText: messageText, sender: sender, timestamp: date, messageId: messageID)
         }
         
         // convert a message to a dictionary
         var dictionaryRepresentation: [String: Any] {
            
-            let formatter = DateFormatter()
+            var dateFormatter: DateFormatter {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "MM-dd-yyy'T'HH:mm:SS"
+                return formatter
+            }
             
             return ["messageID" : messageId as String,
                     "text" : messageText as String,
-                    "timestamp" : formatter.string(from: timestamp),
+                    "timestamp" : dateFormatter.string(from: timestamp),
                     "senderId" : senderId as String,
                     "displayName": displayName as String]
         }

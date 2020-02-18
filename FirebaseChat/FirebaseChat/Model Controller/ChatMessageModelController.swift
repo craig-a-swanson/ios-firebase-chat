@@ -68,7 +68,7 @@ class ChatMessageController {
                     newMessages.append(message)
                 }
             }
-            let sortedMessages = newMessages.sorted { $0.sentDate < $1.sentDate}
+            let sortedMessages = newMessages.sorted { $0.timestamp < $1.timestamp}
             DispatchQueue.main.async {
                 chatRoom.messages = sortedMessages
             }
@@ -78,8 +78,7 @@ class ChatMessageController {
     
     func createMessage(in chatRoom: ChatRoom, withText text: String, sender: Sender, completion: @escaping () -> Void) {
 
-        let currentTime = Date()
-        let message = ChatRoom.Message(messageText: text, sender: sender, timestamp: currentTime)
+        let message = ChatRoom.Message(messageText: text, sender: sender)
         let messageChatReference = self.messageReference.child(chatRoom.roomID)
         let messageReference = messageChatReference.child(message.messageId)
         messageReference.setValue(message.dictionaryRepresentation)
