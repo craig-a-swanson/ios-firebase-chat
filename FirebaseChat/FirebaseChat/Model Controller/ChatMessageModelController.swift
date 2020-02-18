@@ -20,37 +20,28 @@ import FirebaseDatabase
 
 class ChatMessageController {
     
-    static let baseURL = URL(string: "https://fir-chat-3a173.firebaseio.com/")!
-    var databaseReference: DatabaseReference!
+    var databaseReference = DatabaseReference()
     var chatRooms: [ChatRoom] = []
-    var dataSnapshots: [DataSnapshot]! = []
+    let roomReference = Database.database().reference(withPath: "chatRoom")
     fileprivate var _refHandle: DatabaseHandle!
     var currentUser: Sender?
     
-//    func configureDatabase() {
-//        databaseReference = Database.database().reference()
-//        // this next one listens for a new "child added" (messages addition)
-//        _refHandle = self.databaseReference.child("messages").observe(.childAdded, with: { [weak self] (snapshot) -> Void in
-//            guard let strongSelf = self else { return }
-//            strongSelf.messages.append(snapshot)
-//            strongSelf.clientTable.insertRows(at: [IndexPath(row: strongSelf.messages.count-1, section: 0)], with: .automatic)
-//        })
-//    }
     
     func fetchChatRooms(completion: @escaping () -> Void) {
         
-        // set the firebase reference and an observer
-        databaseReference = Database.database().reference()
-        
-        databaseReference.child("chatRoom").observeSingleEvent(of: .value) { (snapshot) in
-            guard let chatroomsByID = snapshot.value as? [String: ChatRoom] else {
-                return
-            }
-            let chatRooms = Array<ChatRoom>(chatroomsByID.values)
-            self.chatRooms = chatRooms
+        // set the child observer
+        roomReference.observe(.value) { (snapshot) in
+            var newRooms: [ChatRoom] = []
+            for child in snapshot.children {
+                if let childSnapshot = child as? DataSnapshot,
+                    let chatRoom = ChatRoom(snapshot: childSnapshot) {
+                    newRooms.append(chatRoom)
+                }
+        }
+            self.chatRooms = newRooms
             completion()
         }
-        
+     }
 //        
 //        databaseReference.child("chatRoom").observe(.value) { (snapshot) in
 //            // code to execute when a child is added under "chatRoom"
@@ -95,25 +86,24 @@ class ChatMessageController {
 //            print(self.chatRooms.count)
 //            
 //        }
-    }
+
     
     func createChatRoom(with chatroom: ChatRoom, completion: @escaping (Error?) -> Void) {
         
-        databaseReference = Database.database().reference()
-        let newRoomReference = databaseReference.child("chatRoom").child(chatroom.roomID)
+        let newRoomReference = roomReference.child(chatroom.roomID)
         
-        newRoomReference.setValue(chatroom) { error, _ in
+        newRoomReference.setValue(chatroom.dictionaryRepresentation) { error, _ in
             completion(error)
         }
     }
     
-    func createMessage(in chatRoom: ChatRoom, withText text: String, sender: Sender, completion: @escaping () -> Void) {
-        
-        guard let index = chatRooms.firstIndex(of: chatRoom) else { completion(); return }
-        
-        let message = ChatRoom.Message(messageText: text, sender: sender)
-        
-        chatRooms[index].messages.append(message)
-        
-    }
+//    func createMessage(in chatRoom: ChatRoom, withText text: String, sender: Sender, completion: @escaping () -> Void) {
+//        
+//        guard let index = chatRooms.firstIndex(of: chatRoom) else { completion(); return }
+//        
+//        let message = ChatRoom.Message(messageText: text, sender: sender)
+//        
+//        chatRooms[index].messages.append(message)
+//        
+//    }
 }

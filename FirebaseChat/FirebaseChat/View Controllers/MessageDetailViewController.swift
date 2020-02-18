@@ -46,7 +46,8 @@ extension MessageDetailViewController: MessagesDataSource {
     }
     
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
-        return chatRoom?.messages.count ?? 0
+        guard let chatRoom = chatRoom else { return 0 }
+        return chatRoom.messages?.count ?? 0
     }
     
 //    func numberOfItems(inSection section: Int, in messagesCollectionView: MessagesCollectionView) -> Int {
@@ -54,7 +55,8 @@ extension MessageDetailViewController: MessagesDataSource {
 //    }
     
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
-        guard let message = chatRoom?.messages[indexPath.item] else {
+        guard let chatRoom = chatRoom else { fatalError("No message found in thread")}
+        guard let message = chatRoom.messages?[indexPath.item] else {
             fatalError("No message found in thread")
         }
         return message
@@ -108,14 +110,14 @@ extension MessageDetailViewController: MessagesDisplayDelegate {
         avatarView.set(avatar: avatar)
     }
     
-    func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
-        guard let chatRoom = chatRoom,
-            let currentSender = currentSender() as? Sender else { return }
-        
-        chatMessageController?.createMessage(in: chatRoom, withText: text, sender: currentSender) {
-            DispatchQueue.main.async {
-                self.messagesCollectionView.reloadData()
-            }
-        }
-    }
+//    func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
+//        guard let chatRoom = chatRoom,
+//            let currentSender = currentSender() as? Sender else { return }
+//        
+//        chatMessageController?.createMessage(in: chatRoom, withText: text, sender: currentSender) {
+//            DispatchQueue.main.async {
+//                self.messagesCollectionView.reloadData()
+//            }
+//        }
+//    }
 }

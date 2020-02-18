@@ -60,12 +60,6 @@ class ChatRoomTableViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        chatMessageController.fetchChatRooms {
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
-        }
     }
     
     @IBAction func createChatRoom(_ sender: UITextField) {
@@ -73,19 +67,22 @@ class ChatRoomTableViewController: UITableViewController {
         
         guard let roomName = chatRoomTextField.text else { return }
         chatRoomTextField.text = ""
+        let newChatRoom = ChatRoom(roomName: roomName)
         
-        chatMessageController.createChatRoom(with: roomName) {
+        chatMessageController.createChatRoom(with: newChatRoom, completion: { (possibleError) in
+            guard let error = possibleError else { return }
+            
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
-        }
+        })
     }
     
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -109,7 +106,7 @@ class ChatRoomTableViewController: UITableViewController {
             guard let indexPath = tableView.indexPathForSelectedRow,
                 let messageDetailVC = segue.destination as? MessageDetailViewController else { return }
             
-            
+            messageDetailVC.chatRoom = chatMessageController.chatRooms[indexPath.row]
         }
     }
 }

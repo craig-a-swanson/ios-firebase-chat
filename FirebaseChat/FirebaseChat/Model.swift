@@ -14,34 +14,32 @@ import Firebase
 
 class ChatRoom: Codable, Equatable {
     
-    let roomName: String
     let roomID: String
-    var messages: [Message]
+    let roomName: String
+    var messages: [Message]?
     
-    init(roomName: String, roomID: String = UUID().uuidString, messages: [Message] = []) {
-        self.roomName = roomName
+    init(roomID: String = UUID().uuidString, roomName: String, messages: [Message]? = []) {
         self.roomID = roomID
+        self.roomName = roomName
         self.messages = messages
+    }
+    
+    // convert a dictionary back to a message object to be used by the rest of the app
+    convenience init? (snapshot: DataSnapshot) {
+        guard let value = snapshot.value as? [String:Any],
+            let roomID = value["roomID"] as? String,
+            let roomName = value["roomName"] as? String else { return nil }
+
+        self.init(roomID: roomID, roomName: roomName, messages: nil)
+        
     }
     
     // convert a message to a dictionary
     var dictionaryRepresentation: [String: Any] {
-        return ["roomName" : roomName as String,
-                "roomID" : roomID as String,
-                "messages" : messages as [Message]]
+        return ["roomID" : roomID as String,
+                "roomName" : roomName as String]
     }
     
-    // convert a dictionary back to a message object to be used by the rest of the app
-    convenience init? (dictionary: [String: String]) {
-        guard let roomName = dictionary["roomName"],
-            let roomID = dictionary["roomID"],
-            let messages = dictionary["messages"] else { return nil }
-        let messageArray: [ChatRoom.Message] = Array(messages)
-        for message in messages {
-            let newMessage = Message(dictionary: [:])
-        }
-        self.init(roomName: roomName, roomID: roomID, messages: messageArray)
-    }
     
 //    enum RoomCodingKeys: String, CodingKey {
 //        case title
@@ -89,6 +87,23 @@ class ChatRoom: Codable, Equatable {
             self.messageId = messageId
         }
         
+        // convert a dictionary back to a message object to be used by the rest of the app
+        init? (snapshot: DataSnapshot) {
+            guard let value = snapshot.value as? [String:Any],
+                let messageID = value["messageID"] as? String,
+                let messageText = value["text"] as? String,
+                let timestamp: Date = {
+                    let stringDate = value["timestamp"] as? String
+                    let dateFormatter = ISO8601DateFormatter()
+                    let date = dateFormatter.date(from: stringDate!)
+                    return date
+                }(),
+                let senderId = value["senderId"] as? String,
+                let displayName = value["displayName"] as? String else { return nil }
+            let sender = Sender(senderId: senderId, displayName: displayName)
+            self.init(messageText: messageText, sender: sender, timestamp: timestamp, messageId: messageID)
+        }
+        
         // convert a message to a dictionary
         var dictionaryRepresentation: [String: Any] {
             return ["messageID" : messageId as String,
@@ -98,21 +113,6 @@ class ChatRoom: Codable, Equatable {
                     "displayName": displayName as String]
         }
         
-        // convert a dictionary back to a message object to be used by the rest of the app
-        init? (dictionary: [String:String]) {
-            guard let messageID = dictionary["messageID"],
-                let messageText = dictionary["text"],
-                let timestamp: Date = {
-                    let stringDate = dictionary["timestamp"]
-                    let dateFormatter = ISO8601DateFormatter()
-                    let date = dateFormatter.date(from: stringDate!)
-                    return date
-                }(),
-                let senderId = dictionary["senderId"],
-                let displayName = dictionary["displayName"] else { return nil }
-            let sender = Sender(senderId: senderId, displayName: displayName)
-            self.init(messageText: messageText, sender: sender, timestamp: timestamp, messageId: messageID)
-        }
 //
 //        enum CodingKeys: String, CodingKey {
 //            case displayName
