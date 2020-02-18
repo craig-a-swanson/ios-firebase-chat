@@ -60,8 +60,8 @@ class ChatMessageController {
     func fetchMessages(with chatRoom: ChatRoom, completion: @escaping () -> Void) {
         
         let messageChatReference = self.messageReference.child(chatRoom.roomID)
-        var newMessages: [ChatRoom.Message] = []
         messageChatReference.observe(.value) { (snapshot) in
+            var newMessages: [ChatRoom.Message] = []
             for child in snapshot.children {
                 if let childSnapshot = child as? DataSnapshot,
                     let message = ChatRoom.Message(snapshot: childSnapshot) {
@@ -76,11 +76,13 @@ class ChatMessageController {
         }
     }
     
+    
     func createMessage(in chatRoom: ChatRoom, withText text: String, sender: Sender, completion: @escaping () -> Void) {
 
         let message = ChatRoom.Message(messageText: text, sender: sender)
         let messageChatReference = self.messageReference.child(chatRoom.roomID)
         let messageReference = messageChatReference.child(message.messageId)
         messageReference.setValue(message.dictionaryRepresentation)
+        completion()
     }
 }

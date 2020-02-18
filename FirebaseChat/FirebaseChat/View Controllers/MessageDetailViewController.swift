@@ -15,7 +15,16 @@ class MessageDetailViewController: MessagesViewController, InputBarAccessoryView
     
     // MARK: - Properties
     var chatMessageController: ChatMessageController?
-    var chatRoom: ChatRoom?
+    var chatRoom: ChatRoom? {
+        didSet {
+            guard let chatRoom = chatRoom else { return }
+            chatMessageController?.fetchMessages(with: chatRoom, completion: {
+                DispatchQueue.main.async {
+                    self.messagesCollectionView.reloadData()
+                }
+            })
+        }
+    }
     
     private lazy var formatter: DateFormatter = {
         let result = DateFormatter()
@@ -32,13 +41,6 @@ class MessageDetailViewController: MessagesViewController, InputBarAccessoryView
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
-        
-        guard let chatRoom = chatRoom else { return }
-        chatMessageController?.fetchMessages(with: chatRoom, completion: {
-            DispatchQueue.main.async {
-                self.messagesCollectionView.reloadData()
-            }
-        })
     }
 
 }
