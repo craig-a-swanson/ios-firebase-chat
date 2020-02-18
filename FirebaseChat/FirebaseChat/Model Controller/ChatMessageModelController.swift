@@ -22,8 +22,9 @@ class ChatMessageController {
     
     var databaseReference = DatabaseReference()
     var chatRooms: [ChatRoom] = []
+    var messages: [ChatRoom.Message] = []
     let roomReference = Database.database().reference(withPath: "chatRoom")
-    fileprivate var _refHandle: DatabaseHandle!
+    let messageReference = Database.database().reference(withPath: "messages")
     var currentUser: Sender?
     
     
@@ -38,54 +39,13 @@ class ChatMessageController {
                     newRooms.append(chatRoom)
                 }
         }
-            self.chatRooms = newRooms
+            let sortedChatRooms = newRooms.sorted { $0.roomName < $1.roomName }
+            DispatchQueue.main.async {
+                self.chatRooms = sortedChatRooms
+            }
             completion()
         }
      }
-//        
-//        databaseReference.child("chatRoom").observe(.value) { (snapshot) in
-//            // code to execute when a child is added under "chatRoom"
-//            // take the value from snapshot and add it to the array for the tableview datasource
-//            let possibleRoom = snapshot.value as? [String: Any]
-//            
-//            guard let actualRoom = possibleRoom,
-//                let roomName = actualRoom["roomName"] as? String,
-//                let roomID = actualRoom["roomID"] as? String else { return }
-//            
-//            var possibleMessages: [ChatRoom.Message] = []
-//            
-//            self.databaseReference.child("chatRoom/messages").observeSingleEvent(of: .value) { (messageSnapshot) in
-//                let possibleMessage = messageSnapshot.value as? [String: Any]
-//                
-//                guard let actualMessage = possibleMessage,
-//                let messageID = actualMessage["messageID"] as? String,
-//                let timestamp = actualMessage["timestamp"] as? NSNumber,
-//                let displayName = actualMessage["displayName"] as? String,
-//                let senderId = actualMessage["senderId"] as? String,
-//                    let text = actualMessage["text"] as? String else { return }
-//                
-//                let currentSender = Sender(senderId: senderId, displayName: displayName)
-//                
-//                let formatter: DateFormatter = {
-//                    let result = DateFormatter()
-//                    result.dateStyle = .medium
-//                    result.timeStyle = .medium
-//                    return result
-//                }()
-//                
-//                let messageTimestamp = Date(timeIntervalSince1970: TimeInterval(timestamp))
-////                guard let messageTimestamp = formatter.date(from: timestamp) else { return }
-//                
-//                let newMessage = ChatRoom.Message(messageText: text, sender: currentSender, timestamp: messageTimestamp, messageId: messageID)
-//                possibleMessages.append(newMessage)
-//            }
-//            
-//            let newRoom = ChatRoom(roomName: roomName, roomID: roomID, messages: possibleMessages)
-//            
-//            self.chatRooms.append(newRoom)
-//            print(self.chatRooms.count)
-//            
-//        }
 
     
     func createChatRoom(with chatroom: ChatRoom, completion: @escaping (Error?) -> Void) {
@@ -97,13 +57,31 @@ class ChatMessageController {
         }
     }
     
-//    func createMessage(in chatRoom: ChatRoom, withText text: String, sender: Sender, completion: @escaping () -> Void) {
-//        
-//        guard let index = chatRooms.firstIndex(of: chatRoom) else { completion(); return }
-//        
-//        let message = ChatRoom.Message(messageText: text, sender: sender)
-//        
-//        chatRooms[index].messages.append(message)
-//        
-//    }
+    func fetchMessages(with chatRoom: ChatRoom, completion: @escaping () -> Void) {
+        
+        let messageChatReference = self.messageReference.child(chatRoom.roomID)
+        var newMessages: [ChatRoom.Message] = []
+        messageChatReference.observe(.value) { (snapshot) in
+            for child in snapshot.children {
+                if let childSnapshot = child as? DataSnapshot,
+                    let message = ChatRoom.Message(snapshot: childSnapshot) {
+                    newMessages.append(message)
+                }
+            }
+            let sortedMessages = newMessages.sorted { $0.sentDate < $1.sentDate}
+            DispatchQueue.main.async {
+                chatRoom.messages = sortedMessages
+            }
+            completion()
+        }
+    }
+    
+    func createMessage(in chatRoom: ChatRoom, withText text: String, sender: Sender, completion: @escaping () -> Void) {
+
+        let currentTime = Date()
+        let message = ChatRoom.Message(messageText: text, sender: sender, timestamp: currentTime)
+        let messageChatReference = self.messageReference.child(chatRoom.roomID)
+        let messageReference = messageChatReference.child(message.messageId)
+        messageReference.setValue(message.dictionaryRepresentation)
+    }
 }

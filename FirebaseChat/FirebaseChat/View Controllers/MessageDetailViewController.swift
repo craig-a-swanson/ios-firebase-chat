@@ -24,6 +24,7 @@ class MessageDetailViewController: MessagesViewController, InputBarAccessoryView
         return result
     }()
 
+    // MARK: - View Controller Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -31,34 +32,42 @@ class MessageDetailViewController: MessagesViewController, InputBarAccessoryView
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
+        
+        guard let chatRoom = chatRoom else { return }
+        chatMessageController?.fetchMessages(with: chatRoom, completion: {
+            DispatchQueue.main.async {
+                self.messagesCollectionView.reloadData()
+            }
+        })
     }
 
 }
 
+// MARK: - Messages Data Source
 extension MessageDetailViewController: MessagesDataSource {
     // --- Required Delegate Methods ---
     func currentSender() -> SenderType {
         if let currentUser = chatMessageController?.currentUser {
             return currentUser
         } else {
-            return Sender(senderId: "foo", displayName: "bar")
+            return Sender(senderId: "", displayName: "")
         }
     }
     
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
-        guard let chatRoom = chatRoom else { return 0 }
-        return chatRoom.messages?.count ?? 0
+        return 1
     }
     
-//    func numberOfItems(inSection section: Int, in messagesCollectionView: MessagesCollectionView) -> Int {
-//        return 0
-//    }
+    func numberOfItems(inSection section: Int, in messagesCollectionView: MessagesCollectionView) -> Int {
+//        guard let chatRoom = chatRoom else { return 0 }
+        return chatRoom?.messages?.count ?? 0
+    }
     
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
-        guard let chatRoom = chatRoom else { fatalError("No message found in thread")}
-        guard let message = chatRoom.messages?[indexPath.item] else {
-            fatalError("No message found in thread")
-        }
+//        guard let chatRoom = chatRoom else { fatalError("No message found in thread")}
+        guard let chatRoom = chatRoom else { fatalError() }
+        let message = chatRoom.messages![indexPath.item]
+        
         return message
     }
     
@@ -77,6 +86,7 @@ extension MessageDetailViewController: MessagesDataSource {
     }
 }
 
+// MARK: - Layout Delegate
 extension MessageDetailViewController: MessagesLayoutDelegate {
     func messageTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         return 16
@@ -87,6 +97,7 @@ extension MessageDetailViewController: MessagesLayoutDelegate {
     }
 }
 
+// MARK: - Display Delegate
 extension MessageDetailViewController: MessagesDisplayDelegate {
     func textColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
         return isFromCurrentSender(message: message) ? .white : .black
@@ -110,14 +121,15 @@ extension MessageDetailViewController: MessagesDisplayDelegate {
         avatarView.set(avatar: avatar)
     }
     
-//    func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
-//        guard let chatRoom = chatRoom,
-//            let currentSender = currentSender() as? Sender else { return }
-//        
-//        chatMessageController?.createMessage(in: chatRoom, withText: text, sender: currentSender) {
-//            DispatchQueue.main.async {
-//                self.messagesCollectionView.reloadData()
-//            }
-//        }
-//    }
+    // MARK: - Methods
+    func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
+        guard let chatRoom = chatRoom,
+            let currentSender = currentSender() as? Sender else { return }
+        
+        chatMessageController?.createMessage(in: chatRoom, withText: text, sender: currentSender) {
+            DispatchQueue.main.async {
+                self.messagesCollectionView.reloadData()
+            }
+        }
+    }
 }

@@ -106,6 +106,7 @@ class ChatRoomTableViewController: UITableViewController {
             guard let indexPath = tableView.indexPathForSelectedRow,
                 let messageDetailVC = segue.destination as? MessageDetailViewController else { return }
             
+            messageDetailVC.chatMessageController = chatMessageController
             messageDetailVC.chatRoom = chatMessageController.chatRooms[indexPath.row]
         }
     }
